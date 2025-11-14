@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile.coordinator
+    container_name: mapreduce-coordinator
+    ports:
+      - "50051:50051"
+    volumes:
+      - ./data:/data
+    networks:
+      - mapreduce-net
+    environment:
+      - COORDINATOR_PORT=50051
+      - NUM_WORKERS=4
+
+  worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: mapreduce-worker-1
+    depends_on:
+      - coordinator
+    volumes:
+      - ./data:/data
+    networks:
+      - mapreduce-net
+    environment:
+      - WORKER_ID=worker-1
+      - COORDINATOR_HOST=coordinator
+      - COORDINATOR_PORT=50051
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+
+  worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: mapreduce-worker-2
+    depends_on:
+      - coordinator
+    volumes:
+      - ./data:/data
+    networks:
+      - mapreduce-net
+    environment:
+      - WORKER_ID=worker-2
+      - COORDINATOR_HOST=coordinator
+      - COORDINATOR_PORT=50051
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+
+  worker-3:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: mapreduce-worker-3
+    depends_on:
+      - coordinator
+    volumes:
+      - ./data:/data
+    networks:
+      - mapreduce-net
+    environment:
+      - WORKER_ID=worker-3
+      - COORDINATOR_HOST=coordinator
+      - COORDINATOR_PORT=50051
+      - SIMULATE_STRAGGLER=true  # For testing straggler detection
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+
+  worker-4:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: mapreduce-worker-4
+    depends_on:
+      - coordinator
+    volumes:
+      - ./data:/data
+    networks:
+      - mapreduce-net
+    environment:
+      - WORKER_ID=worker-4
+      - COORDINATOR_HOST=coordinator
+      - COORDINATOR_PORT=50051
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+
+networks:
+  mapreduce-net:
+    driver: bridge
+
+volumes:
+  data:

@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package mapreduce;
+
+// Coordinator Service - handles job submission and status
+service Coordinator {
+  rpc SubmitJob(SubmitJobRequest) returns (SubmitJobResponse);
+  rpc GetJobStatus(GetJobStatusRequest) returns (GetJobStatusResponse);
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
+  rpc ReportTaskComplete(ReportTaskCompleteRequest) returns (ReportTaskCompleteResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+}
+
+// Job submission
+message SubmitJobRequest {
+  string input_path = 1;
+  string output_path = 2;
+  bytes mapper_code = 3;
+  bytes reducer_code = 4;
+  int32 num_maps = 5;
+  int32 num_reduces = 6;
+}
+
+message SubmitJobResponse {
+  string job_id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// Job status
+message GetJobStatusRequest {
+  string job_id = 1;
+}
+
+message GetJobStatusResponse {
+  string job_id = 1;
+  string status = 2;  // PENDING, RUNNING, COMPLETED, FAILED
+  int32 map_progress = 3;
+  int32 reduce_progress = 4;
+  int32 total_maps = 5;
+  int32 total_reduces = 6;
+}
+
+// Task assignment
+message GetTaskRequest {
+  string worker_id = 1;
+}
+
+message GetTaskResponse {
+  string task_id = 1;
+  string task_type = 2;  // MAP, REDUCE, NONE
+  string job_id = 3;
+  
+  // For MAP tasks
+  string input_file = 4;
+  int32 map_task_number = 5;
+  int32 num_reduces = 6;
+  bytes mapper_code = 7;
+  
+  // For REDUCE tasks
+  int32 reduce_task_number = 8;
+  int32 num_maps = 9;
+  bytes reducer_code = 10;
+}
+
+// Task completion
+message ReportTaskCompleteRequest {
+  string worker_id = 1;
+  string task_id = 2;
+  bool success = 3;
+  string error_message = 4;
+}
+
+message ReportTaskCompleteResponse {
+  bool acknowledged = 1;
+}
+
+// Heartbeat
+message HeartbeatRequest {
+  string worker_id = 1;
+  string current_task_id = 2;
+}
+
+message HeartbeatResponse {
+  bool acknowledged = 1;
+}
+
+// Intermediate data format
+message KeyValue {
+  string key = 1;
+  string value = 2;
+}
+
+message KeyValueList {
+  repeated KeyValue pairs = 1;
+}

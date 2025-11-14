@@ -1,0 +1,5 @@
+hello world
+hello mapreduce
+world of distributed systems
+mapreduce is powerful
+hello again
